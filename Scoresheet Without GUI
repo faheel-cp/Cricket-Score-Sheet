@@ -1,0 +1,393 @@
+#include <iostream>
+#include <conio.h>
+#include <string.h>
+
+using namespace std;
+
+string getPlayerStatus(int playerStatusCode)
+{
+	switch (playerStatusCode)
+	{
+		case 0:  return "";
+    	case 1:  return "not out";
+    	case 2:  return "bowled out";
+    	case 3:  return "caught out";
+    	case 4:  return "run out";
+    	default: return "unknown";
+    }
+    return "unknown";
+}
+
+class CricketTeam
+{
+    char teamName[20];
+    char playerNames[12][20];
+    int playerRuns[12];
+    int playerStatuses[12];
+    int playerBalls[12];
+    int totalPlayers;
+    int extraRuns;
+	public:
+
+       	CricketTeam();
+
+       	int initializeTeam(void);
+       	char* getPlayerName(int index)
+	    {
+			return playerNames[index];
+		}
+       	int getPlayerRun(int index)
+	   	{
+	   		return playerRuns[index];
+		}
+       	int getPlayerStatus(int index)
+		{
+		   return playerStatuses[index];
+		}
+       	int getExtraRuns(void)
+		{
+			return extraRuns;
+		}
+       	int getPlayerBalls(int index)
+		{
+			return playerBalls[index];
+		}
+       	char* getTeamName()
+		{
+			return teamName;
+		}
+       	int getTotalScore(void);
+       	void addPlayerRuns(int playerIndex, int runs);
+       	void setPlayerStatus(int playerIndex, int status)
+		{
+			playerStatuses[playerIndex] = status;
+		};
+       	void setPlayerOut(int outPlayerIndex, int outType, int newPlayerIndex);
+       	void incrementPlayerBalls(int playerIndex)
+		{
+			playerBalls[playerIndex]++;
+		}
+       	void addExtraRuns(int runs)
+		{
+			extraRuns += runs;
+		};
+};
+
+/**** Default Constructor **********/
+
+CricketTeam::CricketTeam()
+{
+	for(int i = 1; i <= 12; i++)
+	{
+   		strcpy(playerNames[i], "Player");
+   		playerRuns[i] = 0;
+		playerStatuses[i] = 0;
+		playerBalls[i] = 0;
+	}
+	strcpy(teamName, "INDIA");
+	extraRuns = 0;
+	totalPlayers = 0;
+}
+
+/***** Initialize Team **********/
+
+int CricketTeam::initializeTeam(void)
+{
+  	cout << "Enter Team Name: ";
+	cin >> teamName;
+ 	cout << "No of players of the team: ";
+	cin >> totalPlayers;
+  	cout << "Enter Name of the Players.......\n";
+	for(int i = 1; i <= totalPlayers; i++)
+   	{
+	    cout << "                  Player" << i << ": ";
+	    cin >> playerNames[i];
+	    cout << "\n\n";
+	    playerRuns[i] = 0;
+	    playerStatuses[i] = 0;
+	}
+	return totalPlayers;
+}
+
+void CricketTeam::addPlayerRuns(int playerIndex, int runs)
+{
+  	playerRuns[playerIndex] += runs;
+  	getTotalScore();
+}
+
+/***** Calculate & Get Total Run ****/
+
+int CricketTeam::getTotalScore()
+{
+  	int totalScore = 0;
+  	for(int i = 1; i <= totalPlayers; i++)
+  	{
+    		totalScore += playerRuns[i];           // Players Score
+  		totalScore += extraRuns;               // Add Extra
+	}
+  	return totalScore;
+}
+
+void CricketTeam::setPlayerOut(int outPlayerIndex, int outType, int newPlayerIndex)
+{
+	playerStatuses[outPlayerIndex] = outType;             // Current Player out
+	playerStatuses[newPlayerIndex] = 1;                  // New Player Not out
+}
+
+/********** Score Management ***********/
+
+class CricketScore
+{
+    int batsman1;
+    int batsman2;
+    int ballCount;
+    int overs;
+    int maxOvers;
+    int wickets;
+    int maxWickets;
+    CricketTeam cricketTeam;
+    int extraRuns;
+	public:
+    	CricketScore();
+    	void displayScore(void);
+    	void chooseOption(void);
+    	void registerDotBall(void);
+    	void registerRuns(void);
+    	void registerWicket(void);
+    	void registerExtras(void);
+    	void completeOver(void);
+};
+
+CricketScore::CricketScore()
+{
+	batsman1 = 0;
+	batsman2 = 0;
+	extraRuns = 0;
+	overs = 0;
+	wickets = 0;
+	maxWickets = 10;
+	ballCount = 0;
+	maxWickets = cricketTeam.initializeTeam();
+	cout << "\nEnter no of Overs in one Innings: ";
+	cin >> maxOvers;
+	cout << "\n\nChoose opening Batsman(1-11):";
+	while(1)
+	{
+    	cout << "\nbatsman 1:";       // Chose
+    	cin >> batsman1;                             // Opening
+    	cricketTeam.setPlayerStatus(batsman1, 1);   // Batsman
+    	cout << "batsman 2:";
+    	cin >> batsman2;
+    	cricketTeam.setPlayerStatus(batsman2, 1);
+
+    	if(batsman1 > 11 || batsman2 > 11 || batsman1 == batsman2)
+      		cout << "Invalid Entry Try Again!!";
+    	else
+			break;
+    }
+}
+
+/******* Display Score *********/
+
+void CricketScore::displayScore(void)
+{
+	cout << endl << endl;
+	cout << "##################################################" << endl;
+	cout << "                   Team " << cricketTeam.getTeamName() << " Score                     " << endl;
+	cout << "##################################################" << endl << endl;
+
+	for(int i = 1; i <= maxWickets; i++)
+    {
+    	cout << cricketTeam.getPlayerName(i) << "                          ";
+    	cout << getPlayerStatus(cricketTeam.getPlayerStatus(i)) << "                    ";
+    	cout << cricketTeam.getPlayerRun(i);
+    	if(cricketTeam.getPlayerStatus(i))
+			cout << "(" << cricketTeam.getPlayerBalls(i) << ")";
+    	cout << endl;
+   	}
+
+	cout << "\nExtra";
+	cout << "\t" << cricketTeam.getExtraRuns() << endl << endl;
+	cout << "\n\n***************************************************" << endl;
+	cout << "Over " << overs << "." << ballCount << "  Wicket " << wickets;
+	cout << " || total score: ";
+	cout << cricketTeam.getTotalScore() << endl;
+
+    if(ballCount <= 6 * maxOvers)
+    {
+    	chooseOption();
+	}
+}
+
+void CricketScore::chooseOption()
+{
+	cout << "\nChoose option:\n";                  // Options for
+  	cout << "\n\tDot Ball = 1";                    // Updating
+ 	cout << "\n\tAdd Run = 2";                    // Score Card
+ 	cout << "\n\tExtra = 3";
+  	cout << "\n\tWicket = 4";
+  	cout << "\n\tExit = 10\n";
+  	cout << "\t\t\t.................";
+	int option;
+	cin >> option;
+
+	switch (option)
+	{
+    	case 1:
+			registerDotBall();
+			break;
+    	case 2:
+			registerRuns();
+			break;
+    	case 3:
+			registerExtras();
+			break;
+    	case 4:
+			registerWicket();
+			break;
+    	case 10:
+			return;
+    	default:
+			cout << "\nInvalid input\n";
+			registerDotBall();
+	}
+}
+
+/****** Register Dot Ball *******/
+
+void CricketScore::registerDotBall(void)
+{
+
+	cout << "--------------Dot Ball---------------\n";
+
+	ballCount++;
+	cricketTeam.incrementPlayerBalls(batsman1);
+
+	if (ballCount == 6)
+	{
+		completeOver();
+		return;
+	}
+
+	getch();
+	displayScore();
+}
+
+/****** Register Extras *******/
+
+void CricketScore::registerExtras(void)
+{
+	cout << "\n\n************\n";
+	cout << "             Extra Run              \n";
+	cout << "************\n\n";
+	cout << "Extra? ";
+	cin >> extraRuns;
+	cricketTeam.addExtraRuns(extraRuns);
+	displayScore();
+}
+
+/****** Register Runs *******/
+
+void CricketScore::registerRuns(void)
+{
+	cout << "\n\n************\n";
+	cout << "             Add Run              \n";
+	cout << "************\n\n";
+	cout << "Runs? ";
+	int runs;
+	ballCount++;
+	cricketTeam.incrementPlayerBalls(batsman1);
+	cin >> runs;
+	cricketTeam.addPlayerRuns(batsman1, runs);
+
+	if (runs == 1 || runs == 3)
+	{
+		int temp = batsman1;
+		batsman1 = batsman2;
+		batsman2 = temp;
+	}
+
+	if (ballCount == 6)
+	{
+		completeOver();
+		return;
+	}
+
+	displayScore();
+}
+
+/****** Complete Over *******/
+
+void CricketScore::completeOver(void)
+{
+	cout << "\n\n*************\n";
+	cout << "           Over Complete\n";
+	cout << "***********\n";
+	overs++;
+	ballCount = 0;
+	int temp = batsman1;
+	batsman1 = batsman2;
+	batsman2 = temp;
+
+	if (overs == maxOvers)
+	{
+		cout << "\n\n*************\n";
+		cout << "           Innings Complete\n";
+		cout << "***********\n";
+		displayScore();
+		getch();
+		return;
+	}
+	else
+	{
+		getch();
+		displayScore();
+	}
+}
+
+/****** Register Wicket *******/
+
+void CricketScore::registerWicket(void)
+{
+	int outType, newBatsman;
+	cout << "\n\n*************\n";
+	cout << "           Wicket\n";
+	cout << "***********\n";
+	cout << "\nOut type? (Bowled-1, Caught-2, Run-out-3).......";
+	cin >> outType;
+	wickets++;
+	ballCount++;
+	cricketTeam.incrementPlayerBalls(batsman1);
+
+	if (wickets >= maxWickets)
+	{
+		cout << "\n\n*************\n";
+		cout << "           Innings Complete\n";
+		cout << "***********\n";
+		displayScore();
+		cricketTeam.setPlayerStatus(batsman1, outType + 1);
+		getch();
+		return;
+	}
+
+	cout << "\nNew Batsman's number: ";
+	cin >> newBatsman;
+	cricketTeam.setPlayerOut(batsman1, outType + 1, newBatsman);
+	batsman1 = newBatsman;
+
+	if (ballCount == 6)
+	{
+		completeOver();
+		return;
+	}
+
+	getch();
+	displayScore();
+}
+
+int main(void)
+{
+	CricketScore cricketScoreManager;
+	cricketScoreManager.displayScore();
+}
+
